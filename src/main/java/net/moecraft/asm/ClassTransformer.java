@@ -35,38 +35,36 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 
 public class ClassTransformer implements IClassTransformer, Opcodes{
 	private static final String ASM_HOOKS = "net/moecraft/asm/ASMHooks";
 
-	private static final Map<String, Transformer> transformers = new HashMap<>();
-
-	static {	
-		// For Send Runtime CrashReport
-		transformers.put("net.minecraft.crash.CrashReport", ClassTransformer::transformCrashReport);
-	}
+	private static final Map<String, Transformer> transformers = new HashMap<String, Transformer>();
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) {
-		if (transformers.containsKey(transformedName)) {
+		if(transformedName.equals("net.minecraft.crash.CrashReport")){
 			log("Transforming " + transformedName);
-			return transformers.get(transformedName).apply(basicClass);
+			return transformCrashReport(basicClass);
 		}
 		return basicClass;
-	}
-	
+	}	
+
 	private static byte[] transformCrashReport(byte[] basicClass) {
 		MethodSignature sig1 = new MethodSignature("saveToFile", "func_147149_a", "(Ljava/io/File;)Z");
 		
-		return transform(basicClass, forMethod(sig1, (MethodNode method) -> { // Action
-			InsnList newInstructions = new InsnList();
+		return transform(basicClass, forMethod(sig1, new MethodAction() {
+			@Override
+			public boolean test(MethodNode method) { // Action
+				InsnList newInstructions = new InsnList();
 
-			newInstructions.add(new VarInsnNode(ALOAD, 0));
-			newInstructions.add(new MethodInsnNode(INVOKESTATIC, ASM_HOOKS, "sendCrashReport", "(Lnet/minecraft/crash/CrashReport;)V", false));
+				newInstructions.add(new VarInsnNode(ALOAD, 0));
+				newInstructions.add(new MethodInsnNode(INVOKESTATIC, ASM_HOOKS, "sendCrashReport", "(Lnet/minecraft/crash/CrashReport;)V", false));
 
-			method.instructions.insertBefore(method.instructions.getFirst(), newInstructions);
-			return true;
+				method.instructions.insertBefore(method.instructions.getFirst(), newInstructions);
+				return true;
+			}
 		}));
 	}
 
@@ -133,8 +131,13 @@ public class ClassTransformer implements IClassTransformer, Opcodes{
 		}
 	}
 
-	public static MethodAction combine(NodeFilter filter, NodeAction action) {
-		return (MethodNode node) -> applyOnNode(node, filter, action);
+	public static MethodAction combine(final NodeFilter filter, final NodeAction action) {
+		return new MethodAction() {
+			@Override
+			public boolean test(MethodNode node) {
+				return applyOnNode(node, filter, action);
+			}
+		};
 	}
 
 	public static boolean applyOnNode(MethodNode method, NodeFilter filter, NodeAction action) {

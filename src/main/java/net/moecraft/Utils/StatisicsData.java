@@ -14,7 +14,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.stats.StatBase;
 import net.moecraft.MoeCraftAPIMod;
 
@@ -28,33 +27,48 @@ public class StatisicsData{
 		Save();
 	}
 	
-	public void PlayerLogin(EntityPlayerMP player) {
-		AddUUID(player.getName(), player.getUniqueID().toString());
-		offlineStats.removeIf(p->{
-			return p.name.equals(player.getName());
+	public void PlayerLogin(final EntityPlayer player) {
+		AddUUID(player.getDisplayName(), player.getUniqueID().toString());
+		offlineStats.removeIf(new Predicate<PlayerStatis>() {
+			@Override
+			public boolean test(PlayerStatis p) {
+				return p.name.equals(player.getDisplayName());
+			}
 		});
 	}
 	
-	public void PlayerLogout(EntityPlayerMP player) {
-		offlineStats.removeIf(p->{
-			return p.name.equals(player.getName());
+	public void PlayerLogout(final EntityPlayer player) {
+		offlineStats.removeIf(new Predicate<PlayerStatis>() {
+			@Override
+			public boolean test(PlayerStatis p) {
+				return p.name.equals(player.getDisplayName());
+			}
 		});
 		offlineStats.add(new PlayerStatis(player));
 	}
 	
 	public List<PlayerStatis> GetSortList(final StatBase sb, final boolean order){
 		final List<PlayerStatis> back = new ArrayList();
-		List<EntityPlayerMP> server = MoeCraftAPIMod.INSTANCE.getPlayerList().getPlayers();
-		server.forEach(p->{
-			back.add(new PlayerStatis(p));
+		List server = MoeCraftAPIMod.INSTANCE.getConfigurationManager().playerEntityList;
+		server.forEach(new Consumer() {
+			@Override
+			public void accept(Object p) {
+				back.add(new PlayerStatis((EntityPlayer)p));
+			}
 		});
-		offlineStats.forEach(p->{
-			back.add(p);
+		offlineStats.forEach(new Consumer<PlayerStatis>() {
+			@Override
+			public void accept(PlayerStatis p) {
+				back.add(p);
+			}
 		});
-		back.sort((a,b)->{
-			if(!order)
-				return a.GetStat(sb)-b.GetStat(sb);
-			return b.GetStat(sb)-a.GetStat(sb);
+		back.sort(new Comparator<PlayerStatis>() {
+			@Override
+			public int compare(PlayerStatis a, PlayerStatis b) {
+				if(!order)
+					return a.GetStat(sb)-b.GetStat(sb);
+				return b.GetStat(sb)-a.GetStat(sb);
+			}
 		});
 		return back;
 	}
@@ -62,7 +76,7 @@ public class StatisicsData{
 	
 	public void Load() {
 		try{
-			File file = new File(MoeCraftAPIMod.INSTANCE.getWorld(0).getSaveHandler().getWorldDirectory(), "moecraft_stats.dat");
+			File file = new File(MoeCraftAPIMod.INSTANCE.worldServerForDimension(0).getSaveHandler().getWorldDirectory(), "moecraft_stats.dat");
 	        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
 	        Map<String, String> map = (Map<String, String>)ois.readObject();
 	        ois.close();
@@ -81,7 +95,7 @@ public class StatisicsData{
 	
 	public void Save() {
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(MoeCraftAPIMod.INSTANCE.getWorld(0).getSaveHandler().getWorldDirectory(), "moecraft_stats.dat")));
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(MoeCraftAPIMod.INSTANCE.worldServerForDimension(0).getSaveHandler().getWorldDirectory(), "moecraft_stats.dat")));
 	        oos.writeObject(uuidMap);
 	        oos.close();
 	        MoeCraftAPIMod.logger.info("Saved statistics data file");

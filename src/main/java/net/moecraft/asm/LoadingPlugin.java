@@ -2,9 +2,9 @@ package net.moecraft.asm;
 
 import java.util.Map;
 
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
-@IFMLLoadingPlugin.MCVersion("1.12.2")
+@IFMLLoadingPlugin.MCVersion("1.7.10")
 @IFMLLoadingPlugin.Name("MoeCraftAPI Plugin")
 @IFMLLoadingPlugin.TransformerExclusions("net.moecraft.asm")
 @IFMLLoadingPlugin.SortingIndex(1001) // After runtime deobfuscation

@@ -38,7 +38,7 @@ public class MoeSocket {
 		return true;
 	}
 
-	public boolean BeginAccept(IAction<IResult> callBack) {
+	public boolean BeginAccept(final IAction<IResult> callBack) {
 		if (!init)
 			return false;
 		try {
@@ -51,10 +51,10 @@ public class MoeSocket {
 							br.close();
 						if (bw != null) {
 							bw.close();
-						}
+						}		
 						if (client != null)
 							client.close();
-						client = ss.accept();
+						client = ss.accept();				
 						br = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"));
 						bw = new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), "UTF-8"));
 						callBack.invoke(new ResultBasic(true, client.getInetAddress().toString()));
@@ -72,7 +72,7 @@ public class MoeSocket {
 		return true;
 	}
 
-	public boolean BeginSend(String info, IAction<IResult> callBack) {
+	public boolean BeginSend(final String info, final IAction<IResult> callBack) {
 		if (!init || client == null)
 			return false;
 		if (!client.isConnected())
@@ -98,8 +98,8 @@ public class MoeSocket {
 		}
 		return true;
 	}
-
-	public boolean BeginSend(String info) {
+	
+	public boolean BeginSend(final String info) {
 		if (!init || client == null)
 			return false;
 		if (!client.isConnected())
@@ -110,7 +110,7 @@ public class MoeSocket {
 			sendThread = new Thread() {
 				public void run() {
 					try {
-						String send = info + "\r\n";
+						String send =info +  "\r\n";
 						bw.write(send);
 						bw.flush();
 					} catch (IOException e) {
@@ -124,7 +124,7 @@ public class MoeSocket {
 		}
 		return true;
 	}
-
+	
 	public boolean Send(String info) {
 		if (!init || client == null)
 			return false;
@@ -140,7 +140,7 @@ public class MoeSocket {
 		return true;
 	}
 
-	public boolean BeginRecive(IAction<IResult> callBack) {
+	public boolean BeginRecive(final IAction<IResult> callBack) {
 		if (!init || client == null)
 			return false;
 		if (!client.isConnected())

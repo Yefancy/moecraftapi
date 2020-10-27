@@ -2,7 +2,7 @@
 {
   "modid": "moecraftapi",
   "name": "MoeCraft API",
-  "description": "API for MoeCraft",
+  "description": "API for MoeCraft.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "moecraft.net",

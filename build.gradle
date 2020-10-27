@@ -1,29 +1,29 @@
 buildscript {
     repositories {
-        jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
     }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
 
+apply plugin: 'forge'
 
 version = "2.0"
-group = "net.moecraft.moecraftapi" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group= "net.moecraft.moecraftapi" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "moecraftapi"
 
-sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
-}
-
 minecraft {
-    version = "1.12.2-14.23.5.2768"
-    runDir = "run"
-    coreMod = "net.moecraft.asm.LoadingPlugin"
-    mappings = "snapshot_20171003"
+    version = "1.7.10-10.13.4.1614-1.7.10"
+    runDir = "eclipse"
 }
 
 dependencies {
@@ -40,7 +40,8 @@ jar {
     }
 }
 
-processResources {
+processResources
+{
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
@@ -53,7 +54,7 @@ processResources {
         expand 'version':project.version, 'mcversion':project.minecraft.version
     }
         
-    // copy everything else except the mcmod.info
+    // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }

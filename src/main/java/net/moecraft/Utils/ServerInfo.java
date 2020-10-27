@@ -3,19 +3,19 @@ package net.moecraft.Utils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.StatList;
-import net.minecraft.world.DimensionType;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.moecraft.MoeCraftAPIMod;
 
 public class ServerInfo {
-	
+
 	public static String GetCRList() {
 		String list = "Crash Reports List: ";
 		File pos = new File(new File("."), "crash-reports");
@@ -73,7 +73,7 @@ public class ServerInfo {
 
 	public static String GetOnlineList() {
 		MinecraftServer server = MoeCraftAPIMod.INSTANCE;
-		String[] names = server.getOnlinePlayerNames();
+		String[] names = server.getAllUsernames();
 		String list = "Online List: " + names.length;
 		for (int i = 0; i < names.length; i++) {
 			list += "\n   <" + names[i] + ">";
@@ -83,7 +83,7 @@ public class ServerInfo {
 
 	public static String GetPVEList(int top) {
 		String list = "PVE Rank: ";
-		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.MOB_KILLS, true);
+		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.mobKillsStat, true);
 		if (sortList.size() < top)
 			top = sortList.size();
 		list += "top" + top;
@@ -96,7 +96,7 @@ public class ServerInfo {
 
 	public static String GetOnlineTimeList(int top) {
 		String list = "Liver Emperor Rank: ";
-		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.PLAY_ONE_MINUTE, true);
+		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.minutesPlayedStat, true);
 		if (sortList.size() < top)
 			top = sortList.size();
 		list += "top" + top;
@@ -109,7 +109,7 @@ public class ServerInfo {
 
 	public static String GetDeathList(int top) {
 		String list = "Death Rank: ";
-		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.DEATHS, true);
+		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.deathsStat, true);
 		if (sortList.size() < top)
 			top = sortList.size();
 		list += "top" + top;
@@ -122,7 +122,7 @@ public class ServerInfo {
 
 	public static String GetPVPList(int top) {
 		String list = "PVP Rank: ";
-		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.PLAYER_KILLS, true);
+		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.playerKillsStat, true);
 		if (sortList.size() < top)
 			top = sortList.size();
 		list += "top" + top;
@@ -135,7 +135,7 @@ public class ServerInfo {
 
 	public static String GetDistanceWalkedList(int top) {
 		String list = "Walk Rank: ";
-		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.WALK_ONE_CM, true);
+		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.distanceWalkedStat, true);
 		if (sortList.size() < top)
 			top = sortList.size();
 		list += "top" + top;
@@ -148,7 +148,7 @@ public class ServerInfo {
 
 	public static String GetDPSList(int top) {
 		String list = "DPS Rank: ";
-		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.DAMAGE_DEALT, true);
+		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.damageDealtStat, true);
 		if (sortList.size() < top)
 			top = sortList.size();
 		list += "top" + top;
@@ -161,7 +161,7 @@ public class ServerInfo {
 
 	public static String GetTPSList(int top) {
 		String list = "TPS Rank: ";
-		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.DAMAGE_TAKEN, true);
+		List<PlayerStatis> sortList = MoeCraftAPIMod.STATISTICS_DATA.GetSortList(StatList.damageTakenStat, true);
 		if (sortList.size() < top)
 			top = sortList.size();
 		list += "top" + top;
@@ -174,7 +174,7 @@ public class ServerInfo {
 
 	public static String GetTime() {
 		long tmp = MoeCraftAPIMod.INSTANCE.getEntityWorld().getWorldTime();
-		String time = (tmp + 6000) % 24000 / 1000 + ":" + ((tmp + 6000) % 1000)*60/1000;		
+		String time = (tmp + 6000) % 24000 / 1000 + ":" + ((tmp + 6000) % 1000) * 60 / 1000;
 		return time;
 	}
 
@@ -187,14 +187,10 @@ public class ServerInfo {
 	}
 
 	private static String getDimensionPrefix(int dimId) {
-		DimensionType providerType = DimensionManager.getProviderType(dimId);
-		if (providerType == null) {
-			return String.format("Dim %2d", dimId);
-		} else {
-			return String.format("Dim %2d (%s)", dimId, providerType.getName());
-		}
+		String providerType = DimensionManager.getProvider(dimId).getDimensionName();
+		return String.format("Dim %2d (%s)", dimId, providerType);
 	}
-	
+
 	private static List<String> getFiles(File path) {
 		List<String> files = new ArrayList<String>();
 		File[] tempList = path.listFiles();

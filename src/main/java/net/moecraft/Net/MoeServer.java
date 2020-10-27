@@ -1,11 +1,15 @@
 package net.moecraft.Net;
 
+import java.util.function.Consumer;
+
 import com.google.gson.Gson;
 
 import net.minecraft.crash.CrashReport;
-import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import net.moecraft.MoeCraftAPIMod;
+import net.moecraft.Interfaces.IAction;
 import net.moecraft.Interfaces.IResult;
 import net.moecraft.Utils.InfoProtocol;
 import net.moecraft.Utils.ServerInfo;
@@ -23,8 +27,11 @@ public class MoeServer {
 			return;
 		}
 		System.out.println("MoeAPI blind port: " + port);
-		server.BeginAccept(r -> {
-			AcceptCallback(r);
+		server.BeginAccept(new IAction<IResult>() {
+			@Override
+			public void invoke(IResult r) {
+				AcceptCallback(r);
+			}
 		});
 	}
 
@@ -45,22 +52,31 @@ public class MoeServer {
 		if (!r.GetResult()) {
 			MoeCraftAPIMod.logger.info(r.GetInfo());
 			MoeCraftAPIMod.logger.info("MoeAPI accept error. If still error, please reboot or change a blind port!!");
-			server.BeginAccept(r_ -> {
-				AcceptCallback(r_);
+			server.BeginAccept(new IAction<IResult>() {
+				@Override
+				public void invoke(IResult r_) {
+					AcceptCallback(r_);
+				}
 			});
 			return;
 		}
 		MoeCraftAPIMod.logger.info("MoeAPI accepted client IP:" + r.GetInfo());
-		server.BeginRecive(r_ -> {
-			ReciveCallback(r_);
+		server.BeginRecive(new IAction<IResult>() {
+			@Override
+			public void invoke(IResult r_) {
+				ReciveCallback(r_);
+			}
 		});
 	}
 
 	private static void ReciveCallback(IResult r) {
 		if (!r.GetResult()) {
 			MoeCraftAPIMod.logger.info("MoeAPI client " + r.GetInfo());
-			server.BeginAccept(r_ -> {
-				AcceptCallback(r_);
+			server.BeginAccept(new IAction<IResult>() {
+				@Override
+				public void invoke(IResult r_) {
+					AcceptCallback(r_);
+				}
 			});
 			return;
 		}
@@ -127,10 +143,17 @@ public class MoeServer {
 			case 2: //inform
 				break;	
 			case 3: //chat
-				MoeCraftAPIMod.INSTANCE.getPlayerList().sendMessage(new TextComponentString(pkg.info));
+				MoeCraftAPIMod.INSTANCE.getConfigurationManager().playerEntityList.forEach(new Consumer() {
+					@Override
+					public void accept(Object p) {
+						if(!(p instanceof EntityPlayerMP))
+							return;
+						((EntityPlayerMP)p).addChatMessage(new ChatComponentText(pkg.info));
+					}
+				});
 				break;
 			case 4: //cmd
-				String result = ((DedicatedServer)MoeCraftAPIMod.INSTANCE).handleRConCommand(pkg.info);
+				String result = MoeCraftAPIMod.INSTANCE.handleRConCommand(pkg.info);
 				server.BeginSend(GSON.toJson(new InfoProtocol(4, pkg.id, result))); //respond
 				break;
 			case 5: //CR

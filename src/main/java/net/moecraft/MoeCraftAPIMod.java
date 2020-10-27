@@ -1,28 +1,27 @@
 package net.moecraft;
-
 import org.apache.logging.log4j.Logger;
 
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.moecraft.Proxy.ServerProxy;
 import net.moecraft.Utils.StatisicsData;
 
-@Mod(modid = MoeCraftAPIMod.MODID, name = MoeCraftAPIMod.NAME, version = MoeCraftAPIMod.VERSION, acceptableRemoteVersions = "*", acceptedMinecraftVersions = "*")
-public class MoeCraftAPIMod
-{
-	public static ServerProxy proxy = new ServerProxy();
-    public static final String MODID = "moecraftapi";
-    public static final String NAME = "MoeCraft API";
+
+@Mod(modid = MoeCraftAPIMod.MODID, version = MoeCraftAPIMod.VERSION, acceptableRemoteVersions = "*", acceptedMinecraftVersions = "*")
+public class MoeCraftAPIMod {
+	@SidedProxy(serverSide = "net.moecraft.Proxy.ServerProxy")
+	public static ServerProxy proxy;
+	public static final String MODID = "moecraftapi";
     public static final String VERSION = "2.0";
     public static MinecraftServer INSTANCE;
-    public static StatisicsData STATISTICS_DATA;
     public static Logger logger;
-
+    public static StatisicsData STATISTICS_DATA;
+    
     @EventHandler
     void preInit( FMLPreInitializationEvent event )
     {
