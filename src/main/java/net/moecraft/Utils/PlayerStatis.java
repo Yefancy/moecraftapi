@@ -1,28 +1,13 @@
 package net.moecraft.Utils;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.commons.io.FileUtils;
-
-import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.stats.StatBase;
-import net.minecraft.stats.StatList;
-import net.minecraft.stats.StatisticsManagerServer;
-import net.minecraft.util.IJsonSerializable;
-import net.minecraft.util.TupleIntJsonSerializable;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.stats.ServerStatisticsManager;
+import net.minecraft.stats.Stat;
+import net.minecraft.world.dimension.DimensionType;
 import net.moecraft.MoeCraftAPIMod;
 
 public class PlayerStatis {
@@ -49,23 +34,23 @@ public class PlayerStatis {
 		this.damageTaken = damageTaken;
 	}
 
-	public PlayerStatis(EntityPlayerMP player) {
-		name = player.getName();
+	public PlayerStatis(ServerPlayerEntity player) {
+		name = player.getName().getString();
 		uuid = player.getUniqueID().toString();
-		StatisticsManagerServer f = player.getStatFile();
-		minutesPlayed = f.readStat(StatList.PLAY_ONE_MINUTE);
-		deaths = f.readStat(StatList.DEATHS);
-		mobKills = f.readStat(StatList.MOB_KILLS);
-		playerKills = f.readStat(StatList.PLAYER_KILLS);
-		distanceWalked = f.readStat(StatList.WALK_ONE_CM);
-		damageDealt = f.readStat(StatList.DAMAGE_DEALT);
-		damageTaken = f.readStat(StatList.DAMAGE_TAKEN);
+		ServerStatisticsManager f = player.getStats();
+		minutesPlayed = f.getValue(Stat.PLAY_ONE_MINUTE);
+		deaths = f.getValue(StatList.DEATHS);
+		mobKills = f.getValue(StatList.MOB_KILLS);
+		playerKills = f.getValue(StatList.PLAYER_KILLS);
+		distanceWalked = f.getValue(StatList.WALK_ONE_CM);
+		damageDealt = f.getValue(StatList.DAMAGE_DEALT);
+		damageTaken = f.getValue(StatList.DAMAGE_TAKEN);
 	}
 
 	public PlayerStatis(String name, String uuid) {
 		this.name = name;
 		this.uuid = uuid;
-		StatisticsManagerServer f = GetStatsManagerServer(uuid);
+		ServerStatisticsManager f = GetStatsManagerServer(uuid);
 		if (f == null)
 			return;
 		minutesPlayed = f.readStat(StatList.PLAY_ONE_MINUTE);
@@ -95,9 +80,9 @@ public class PlayerStatis {
 		return 0;
 	}
 
-	private StatisticsManagerServer GetStatsManagerServer(String uuid) {
-		StatisticsManagerServer statisticsmanagerserver = null;
-		File file1 = new File(MoeCraftAPIMod.INSTANCE.getWorld(0).getSaveHandler().getWorldDirectory(), "stats");
+	private ServerStatisticsManager GetStatsManagerServer(String uuid) {
+		ServerStatisticsManager statisticsmanagerserver = null;
+		File file1 = new File(MoeCraftAPIMod.INSTANCE.getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), "stats");
 		File file2 = new File(file1, uuid + ".json");
 
 		if (!file2.exists()) {
@@ -105,8 +90,7 @@ public class PlayerStatis {
 		}
 		if (file2.isFile()) {
 			try {
-				statisticsmanagerserver = new StatisticsManagerServer(MoeCraftAPIMod.INSTANCE, file2);
-				statisticsmanagerserver.readStatFile();
+				statisticsmanagerserver = new ServerStatisticsManager(MoeCraftAPIMod.INSTANCE, file2);
 			} catch (JsonParseException jsonparseexception) {
 				MoeCraftAPIMod.logger.error("Couldn\'t parse statistics file " + file2, jsonparseexception);
 			}

@@ -6,15 +6,12 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.stats.StatBase;
 import net.moecraft.MoeCraftAPIMod;
 
@@ -28,14 +25,14 @@ public class StatisicsData{
 		Save();
 	}
 	
-	public void PlayerLogin(EntityPlayerMP player) {
-		AddUUID(player.getName(), player.getUniqueID().toString());
+	public void PlayerLogin(ServerPlayerEntity player) {
+		AddUUID(player.getName().getString(), player.getUniqueID().toString());
 		offlineStats.removeIf(p->{
 			return p.name.equals(player.getName());
 		});
 	}
 	
-	public void PlayerLogout(EntityPlayerMP player) {
+	public void PlayerLogout(ServerPlayerEntity player) {
 		offlineStats.removeIf(p->{
 			return p.name.equals(player.getName());
 		});
@@ -44,7 +41,7 @@ public class StatisicsData{
 	
 	public List<PlayerStatis> GetSortList(final StatBase sb, final boolean order){
 		final List<PlayerStatis> back = new ArrayList();
-		List<EntityPlayerMP> server = MoeCraftAPIMod.INSTANCE.getPlayerList().getPlayers();
+		List<ServerPlayerEntity> server = MoeCraftAPIMod.INSTANCE.getPlayerList().getPlayers();
 		server.forEach(p->{
 			back.add(new PlayerStatis(p));
 		});

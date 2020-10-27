@@ -1,43 +1,34 @@
 package net.moecraft;
 
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.moecraft.Proxy.ServerProxy;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
 import net.moecraft.Utils.StatisicsData;
 
-@Mod(modid = MoeCraftAPIMod.MODID, name = MoeCraftAPIMod.NAME, version = MoeCraftAPIMod.VERSION, acceptableRemoteVersions = "*", acceptedMinecraftVersions = "*")
-public class MoeCraftAPIMod
-{
-	public static ServerProxy proxy = new ServerProxy();
-    public static final String MODID = "moecraftapi";
-    public static final String NAME = "MoeCraft API";
-    public static final String VERSION = "2.0";
+@Mod("moecraftapi")
+public class MoeCraftAPIMod {
+	// Directly reference a log4j logger.
+    public static final Logger logger = LogManager.getLogger();
     public static MinecraftServer INSTANCE;
     public static StatisicsData STATISTICS_DATA;
-    public static Logger logger;
 
-    @EventHandler
-    void preInit( FMLPreInitializationEvent event )
-    {
-        proxy.preInit(event);
+    public MoeCraftAPIMod() {
+    	ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
     }
-    
-    @EventHandler
-    void init( FMLInitializationEvent event )
+
+    private void setup(final FMLCommonSetupEvent event)
     {
-        proxy.init(event);
-    }
-    
-    @EventHandler
-    void postInit( FMLPostInitializationEvent event )
-    {
-        proxy.postInit(event);
+        // some preinit code
+    	logger.info("HELLO FROM PREINIT\n1\n1\n1\n1\n1\n1");
     }
 }

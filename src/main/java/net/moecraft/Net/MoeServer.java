@@ -6,9 +6,9 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.text.TextComponentString;
 import net.moecraft.MoeCraftAPIMod;
-import net.moecraft.Interfaces.IResult;
 import net.moecraft.Utils.InfoProtocol;
 import net.moecraft.Utils.ServerInfo;
+import net.moecraft.Interfaces.IResult;
 
 public class MoeServer {
 	private static MoeSocket server;
